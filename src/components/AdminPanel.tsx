@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  Plus, Trash2, Edit2, Sparkles, AlertCircle, Save, X, Eye, ChevronRight, Play, Loader2
+  Plus, Trash2, Edit2, AlertCircle, Save, X, Eye, ChevronRight, Play, Camera
 } from "lucide-react";
 import { Recipe, RecipeDifficulty } from "../types";
 import RecipeCard from "./RecipeCard";
@@ -34,9 +34,7 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
   const [instructions, setInstructions] = useState<string[]>([""]);
   
   // AI assist state
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState("");
+  const [recipeToDelete, setRecipeToDelete] = useState<string | null>(null);
 
   // Error validations
   const [formErrors, setFormErrors] = useState<string[]>([]);
@@ -165,61 +163,6 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
     setActiveTab("list");
   };
 
-  // AI Generation Trigger
-  const handleGenerateWithAI = async () => {
-    if (!aiPrompt.trim()) {
-      setAiError("Introduceți o denumire sau ingredient cheie pentru AI (ex: 'Supa crema de dovleac' sau 'Clatite cu afine').");
-      return;
-    }
-
-    setAiLoading(true);
-    setAiError("");
-    try {
-      const response = await fetch("/api/gemini/generate-recipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: aiPrompt })
-      });
-
-      if (!response.ok) {
-        throw new Error("Eroare la solicitarea serverului de inteligență artificială.");
-      }
-
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Autopopulate parameters
-      if (data.title) setTitle(data.title);
-      if (data.description) setDescription(data.description);
-      if (data.category) setCategory(data.category);
-      if (data.prepTime) setPrepTime(data.prepTime);
-      if (data.cookTime) setCookTime(data.cookTime);
-      if (data.servings) setServings(data.servings);
-      if (data.difficulty) setDifficulty(data.difficulty as RecipeDifficulty);
-      if (data.calories) setCalories(data.calories);
-      if (data.protein) setProtein(data.protein);
-      if (data.carbs) setCarbs(data.carbs);
-      if (data.fat) setFat(data.fat);
-      if (data.ingredients) setIngredients(data.ingredients);
-      if (data.instructions) setInstructions(data.instructions);
-      
-      // Auto assign a gorgeous topic-relevant unsplash image
-      // Let's perform a lightweight search alias based on title for some fallback photo
-      const foodQuery = encodeURIComponent(data.title.split(" ")[0] || "gourmet");
-      setImageUrl(`https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000&sig=${Math.floor(Math.random() * 1000)}`);
-      
-      setAiPrompt("");
-      setFormErrors([]);
-    } catch (err: any) {
-      setAiError(err.message || "Eroare la procesarea răspunsului AI.");
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
   // Helper temporary Preview Recipe
   const previewRecipeObj: Recipe = {
     id: editingRecipe?.id || "preview-temp",
@@ -246,10 +189,10 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
       {/* Admin Title Block */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-stone-100 pb-6 mb-8 gap-4">
         <div>
-          <h2 className="text-2xl font-bold font-display text-stone-900 tracking-tight">
+          <h2 className="text-2xl font-bold font-display text-stone-900 dark:text-white tracking-tight">
             Panou Administrativ
           </h2>
-          <p className="text-xs text-stone-500 mt-1 leading-normal">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-normal">
             Adaugă, editează, restructurează sau folosește asistentul inteligent Gemini AI pentru a menține colectia de rețete.
           </p>
         </div>
@@ -258,7 +201,7 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
           {activeTab === "list" && (
             <button
               onClick={handleCreateNew}
-              className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 hover:bg-stone-800 text-white px-4 py-2 text-xs font-semibold shadow-md cursor-pointer transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white text-white dark:text-stone-900 px-4 sm:px-4 py-3 sm:py-2 text-sm sm:text-xs font-semibold shadow-md cursor-pointer transition-all active:scale-95"
               id="admin-create-new-btn"
             >
               <Plus className="h-4 w-4" />
@@ -268,7 +211,7 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 hover:border-stone-400 bg-white text-stone-700 px-4 py-2 text-xs font-medium cursor-pointer transition-all active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-4 sm:px-4 py-3 sm:py-2 text-sm sm:text-xs font-medium cursor-pointer transition-all active:scale-95"
             id="admin-exit-btn"
           >
             Ieșire Admin
@@ -357,24 +300,43 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
                           </span>
                         </td>
                         <td className="py-4 px-6 text-right space-x-1 whitespace-nowrap">
-                          <button
-                            onClick={() => setEditingRecipe(rec)}
-                            className="p-2 text-stone-600 bg-white hover:bg-stone-100 hover:text-stone-900 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
-                            title="Modifica Reteta"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (confirm(`Sigur doriți să ștergeți rețeta "${rec.title}"?`)) {
-                                onDeleteRecipe(rec.id);
-                              }
-                            }}
-                            className="p-2 text-rose-500 bg-white hover:bg-rose-50 hover:text-rose-700 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
-                            title="Sterge Reteta"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {recipeToDelete === rec.id ? (
+                            <div className="inline-flex items-center gap-2">
+                              <span className="text-xs text-rose-500 font-medium">Sigur?</span>
+                              <button
+                                onClick={() => {
+                                  onDeleteRecipe(rec.id);
+                                  setRecipeToDelete(null);
+                                }}
+                                className="px-2 py-1 bg-rose-500 text-white rounded-md text-[10px] font-bold hover:bg-rose-600 transition-colors"
+                              >
+                                DA
+                              </button>
+                              <button
+                                onClick={() => setRecipeToDelete(null)}
+                                className="px-2 py-1 bg-stone-200 text-stone-700 rounded-md text-[10px] font-bold hover:bg-stone-300 transition-colors"
+                              >
+                                NU
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => setEditingRecipe(rec)}
+                                className="p-2 text-stone-600 bg-white hover:bg-stone-100 hover:text-stone-900 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
+                                title="Modifica Reteta"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setRecipeToDelete(rec.id)}
+                                className="p-2 ml-1 text-rose-500 bg-white hover:bg-rose-50 hover:text-rose-700 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
+                                title="Sterge Reteta"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -392,85 +354,41 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
             className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start"
           >
             {/* Form column (Span 7) */}
-            <form onSubmit={handleSubmit} className="lg:col-span-7 bg-white rounded-3xl border border-stone-100 p-6 sm:p-8 shadow-xs space-y-6">
+            <form onSubmit={handleSubmit} className="lg:col-span-7 bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-stone-800 p-6 sm:p-8 shadow-xs space-y-6">
               
-              {/* Gemini Smart Assist */}
-              <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-100">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500 text-white">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-stone-900 tracking-tight">Generează Rețeta cu AI Gemini</h4>
-                    <p className="text-[10px] text-stone-500 mt-0.5">Scrie doar numele (ex: Clătite cu afine), iar AI se ocupă de restul!</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="ex: Ciorbă de fasole cu afumătură..."
-                    className="flex-1 bg-white border border-stone-200 rounded-xl px-3.5 py-1.5 text-xs focus:outline-none focus:border-stone-500 text-stone-800 shadow-2xs"
-                  />
-                  <button
-                    type="button"
-                    disabled={aiLoading}
-                    onClick={handleGenerateWithAI}
-                    className="flex h-9 items-center justify-center rounded-xl bg-stone-900 text-white px-4 text-xs font-medium hover:bg-stone-800 cursor-pointer disabled:opacity-50 transition-all active:scale-95 min-w-[120px] shadow-2xs"
-                  >
-                    {aiLoading ? (
-                      <span className="flex items-center gap-1">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Gândește...
-                      </span>
-                    ) : (
-                      "Generează AI"
-                    )}
-                  </button>
-                </div>
-                {aiError && (
-                  <p className="text-[10px] text-rose-500 mt-2 font-medium flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3 shrink-0" />
-                    {aiError}
-                  </p>
-                )}
-              </div>
-
               {/* General details title/desc */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400 border-b border-stone-50 pb-2">Detalii Generale</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 border-b border-stone-50 dark:border-stone-800 pb-2">Detalii Generale</h3>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">Titlu Rețetă</label>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Titlu Rețetă</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="ex: Paste cu Sos de Hribi"
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                    className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-3 sm:py-2 text-sm sm:text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">Descriere preparat</label>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Descriere preparat</label>
                   <textarea
                     rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="O scurtă descriere ispititoare care să atragă..."
-                    className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                    className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-3 sm:py-2 text-sm sm:text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Categorie rețetă</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Categorie rețetă</label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 cursor-pointer"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-3 sm:py-2 text-sm sm:text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200 cursor-pointer"
                     >
                       <option value="Mic Dejun">Mic Dejun</option>
                       <option value="Prânz">Prânz</option>
@@ -481,14 +399,64 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">URL Imagine Unsplash</label>
-                    <input
-                      type="text"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      placeholder="Adresa URL completă pentru fotografie"
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
-                    />
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Imagine Rețetă</label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="Adresa URL completă"
+                        className="flex-1 w-full min-w-0 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-3 sm:py-2 text-sm sm:text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
+                      />
+                      <label className="flex items-center justify-center h-[46px] sm:h-9 px-4 sm:px-3 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl cursor-pointer border border-stone-200 dark:border-stone-700 transition-colors shrink-0" title="Încarcă poză (Galerie sau Cameră)">
+                        <Camera className="h-5 w-5 sm:h-4 sm:w-4" />
+                        <span className="ml-2 text-sm sm:text-xs font-semibold sm:hidden">Foto</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          capture="environment"
+                          className="hidden" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const img = new Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  let width = img.width;
+                                  let height = img.height;
+                                  const max_size = 800;
+                                  
+                                  if (width > height) {
+                                    if (width > max_size) {
+                                      height *= max_size / width;
+                                      width = max_size;
+                                    }
+                                  } else {
+                                    if (height > max_size) {
+                                      width *= max_size / height;
+                                      height = max_size;
+                                    }
+                                  }
+                                  
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  if (ctx) {
+                                    ctx.drawImage(img, 0, 0, width, height);
+                                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                    setImageUrl(dataUrl);
+                                  }
+                                };
+                                img.src = reader.result as string;
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
