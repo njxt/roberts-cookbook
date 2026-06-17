@@ -2,7 +2,6 @@ import { useState, useEffect, FormEvent, MouseEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Sparkles, ChefHat, Search, SlidersHorizontal, Eye, Heart, ListFilter, ShieldCheck, ArrowRight, X, Clock, HelpCircle, Loader2, Moon, Sun } from "lucide-react";
 import { Recipe, Category, RecipeDifficulty } from "./types";
-import { INITIAL_RECIPES } from "./data";
 import RecipeCard from "./components/RecipeCard";
 import RecipeDetail from "./components/RecipeDetail";
 import AdminPanel from "./components/AdminPanel";
@@ -10,7 +9,7 @@ import { db } from "./firebase";
 import { collection, getDocs, setDoc, doc, deleteDoc, onSnapshot } from "firebase/firestore";
 
 export default function App() {
-  // Recipes master store - hydrated from LocalStorage or seeded from INITIAL_RECIPES
+  // Recipes master store - hydrated from LocalStorage
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   
   // Navigation: "home" | "detail" | "admin"
@@ -57,11 +56,7 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "recipes"), (snapshot) => {
       const dbRecipes = snapshot.docs.map(doc => doc.data() as Recipe);
-      if (dbRecipes.length > 0) {
-        setRecipes(dbRecipes.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-      } else {
-        setRecipes(INITIAL_RECIPES);
-      }
+      setRecipes(dbRecipes.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       setIsAppLoading(false);
     }, (error) => {
       console.error("Firestore error:", error);
@@ -69,7 +64,7 @@ export default function App() {
       // Fallback
       const saved = localStorage.getItem("culinary_recipes");
       if (saved) setRecipes(JSON.parse(saved));
-      else setRecipes(INITIAL_RECIPES);
+      else setRecipes([]);
     });
 
     return () => {
@@ -225,9 +220,8 @@ export default function App() {
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 shadow-xs transition-colors duration-500">
               <ChefHat className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2]" />
             </div>
-            <span className="hidden sm:inline-block truncate">Bespoke Culinary</span>
-            <span className="inline-block sm:hidden truncate">Bespoke</span>
-            <span className="text-stone-400 dark:text-stone-500 font-normal hidden md:inline-block">Studio</span>
+            <span className="hidden sm:inline-block truncate">Robert's Cookbook</span>
+            <span className="inline-block sm:hidden truncate">Robert's</span>
           </div>
 
           {/* Quick Stats list or Admin panel button */}
@@ -301,33 +295,33 @@ export default function App() {
               {/* Premium minimalist landing Hero block matching Prompty image */}
               <div className="text-center max-w-4xl mx-auto mb-16">
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-100 dark:border-amber-900 px-3.5 py-1 text-[10px] font-bold text-[#9d5c3d] dark:text-amber-400 tracking-wider uppercase mb-5">
                     <Sparkles className="h-3 w-3" />
-                    Cabinetul gastronomic personal
+                    Cabinetul nutrițional personal
                   </span>
                   
                   <h2 className="text-4xl sm:text-6xl font-bold font-display text-stone-900 dark:text-white tracking-tight leading-none mb-6 transition-colors duration-500">
-                    Cel mai simplu mod de a explora rețete gourmet.
+                    Cel mai simplu mod de a explora rețete sănătoase pentru sală.
                   </h2>
                   
                   <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed font-normal mb-8 transition-colors duration-500">
-                    Nu mai uita niciodată ideile culinare geniale. Păstrează, gestionează, editează și gătește cele mai bune preparate dintr-un spațiu de lucru absolut curat, aerisit și rapid.
+                    Nu mai uita niciodată ideile pentru mese consistente. Păstrează, gestionează, editează și gătește cele mai bune preparate fitness dintr-un spațiu de lucru absolut curat, aerisit și rapid.
                   </p>
                 </motion.div>
 
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+                  transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col sm:flex-row items-center justify-center gap-3"
                 >
                   <a
                     href="#catalog-grid"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white text-white dark:text-stone-900 px-6 py-3 text-xs font-bold shadow-md shadow-stone-900/10 cursor-pointer transition-all active:scale-95"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white text-white dark:text-stone-900 px-6 py-3 text-xs font-bold shadow-md shadow-stone-900/10 cursor-pointer transition-colors"
                   >
                     Răsfoiește Rețete ({recipes.length})
                     <ArrowRight className="h-4 w-4" />
@@ -335,7 +329,7 @@ export default function App() {
 
                   <button
                     onClick={handleRequestAdminMode}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 bg-white dark:bg-stone-800 px-6 py-3 text-xs font-semibold text-stone-700 dark:text-stone-300 cursor-pointer transition-all active:scale-95 hover:bg-stone-50 dark:hover:bg-stone-700"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 bg-white dark:bg-stone-800 px-6 py-3 text-xs font-semibold text-stone-700 dark:text-stone-300 cursor-pointer transition-colors hover:bg-stone-50 dark:hover:bg-stone-700"
                   >
                     Adaugă Rețeta Ta
                   </button>
@@ -344,7 +338,7 @@ export default function App() {
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
                   className="flex items-center justify-center gap-6 mt-6 text-[10px] text-stone-400 dark:text-stone-500 font-medium uppercase tracking-wider"
                 >
                   <span className="flex items-center gap-1">✨ FIECARE REȚETĂ EDITABILĂ</span>
@@ -665,8 +659,8 @@ export default function App() {
 
       {/* Footer Branding credits */}
       <footer className="border-t border-stone-100 dark:border-stone-800/50 py-10 mt-20 text-center text-xs text-stone-400 dark:text-stone-500 relative transition-colors duration-500">
-        <p>© 2026 Bespoke Culinary Studio. Creat pentru iubitorii de design curat și gusturi excepționale.</p>
-        <p className="mt-1 text-[10px] text-stone-300 dark:text-stone-600">Design exclusivist • Tehnologie Gemini AI</p>
+        <p>© 2026 Robert's Cookbook. Creat pentru iubitorii de design curat și gusturi excepționale.</p>
+        <p className="mt-1 text-[10px] text-stone-300 dark:text-stone-600">Design exclusivist</p>
       </footer>
 
     </div>

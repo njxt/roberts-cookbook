@@ -25,7 +25,7 @@ async function setupServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Bespoke Culinary Studio Server running at http://0.0.0.0:${PORT}`);
+    console.log(`Robert's Cookbook Server running at http://0.0.0.0:${PORT}`);
   });
 }
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, Clock, Users, Flame, Check, Heart, Share2, Printer, X, Info } from "lucide-react";
+import { ArrowLeft, Clock, Users, Flame, Check, Heart, X, Info } from "lucide-react";
 import { Recipe } from "../types";
 
 interface RecipeDetailProps {
@@ -12,7 +12,6 @@ interface RecipeDetailProps {
 export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: RecipeDetailProps) {
   const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
   const [currentServings, setCurrentServings] = useState<number>(recipe.servings);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [showNutritionModal, setShowNutritionModal] = useState(false);
 
   const toggleIngredient = (index: number) => {
@@ -20,27 +19,6 @@ export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: Recip
       ...prev,
       [index]: !prev[index],
     }));
-  };
-
-  const handleShare = () => {
-    setCopiedLink(true);
-    navigator.clipboard.writeText(window.location.href);
-    setTimeout(() => setCopiedLink(false), 2000);
-  };
-
-  const handlePrint = () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    setTimeout(() => {
-      window.print();
-      
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      }
-    }, 150);
   };
 
   // Safe multiplier for ingredients listing if scaling is needed
@@ -99,31 +77,6 @@ export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: Recip
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Print button */}
-          <button
-            onClick={handlePrint}
-            className="flex h-[44px] w-[44px] sm:h-9 sm:w-9 items-center justify-center rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white shadow-xs hover:border-stone-300 dark:hover:border-stone-500 transition-all active:scale-95"
-            title="Tipărește rețeta"
-            id="print-recipe-btn"
-          >
-            <Printer className="h-4 w-4 sm:h-4 sm:w-4" />
-          </button>
-
-          {/* Share button */}
-          <button
-            onClick={handleShare}
-            className="flex h-[44px] w-[44px] sm:h-9 sm:w-9 items-center justify-center rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white shadow-xs hover:border-stone-300 dark:hover:border-stone-500 transition-all active:scale-95 relative"
-            title="Copiază link-ul"
-            id="share-recipe-btn"
-          >
-            <Share2 className="h-4 w-4 sm:h-4 sm:w-4" />
-            {copiedLink && (
-              <span className="absolute -top-9 left-1/2 -translate-x-1/2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-[10px] py-1 px-2 rounded-md shadow-md whitespace-nowrap">
-                Copiat!
-              </span>
-            )}
-          </button>
-
           {/* Favorite button */}
           <button
             onClick={() => onToggleFavorite(recipe.id)}
@@ -137,9 +90,9 @@ export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: Recip
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Title, Category & Description */}
         <div className="text-center md:text-left mb-6">
@@ -155,20 +108,32 @@ export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: Recip
         </div>
 
         {/* Master Recipe Details Frame */}
-        <div className="relative aspect-16/9 w-full overflow-hidden rounded-3xl border border-stone-100 dark:border-stone-800 shadow-md group mb-8">
-          <img
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            referrerPolicy="no-referrer"
-            className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-102"
-          />
+        <div className="relative aspect-16/9 w-full overflow-hidden rounded-3xl border border-stone-100 dark:border-stone-800 shadow-md group mb-8 bg-stone-50 dark:bg-stone-800/50">
+          {recipe.imageUrl ? (
+            <img
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              referrerPolicy="no-referrer"
+              className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-102"
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-stone-300 dark:text-stone-700">
+              <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
         </div>
 
         {/* Dynamic Badges Block */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800 text-center transition-colors">
             <span className="text-[10px] text-stone-400 dark:text-stone-500 font-medium tracking-wider uppercase mb-1">Dificultate</span>
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 capitalize">{recipe.difficulty}</span>
+            <span className={`text-sm font-semibold capitalize ${
+              recipe.difficulty === 'ușor' ? 'text-emerald-600 dark:text-emerald-400' :
+              recipe.difficulty === 'mediu' ? 'text-amber-600 dark:text-amber-400' :
+              'text-rose-600 dark:text-rose-400'
+            }`}>{recipe.difficulty}</span>
           </div>
 
           <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800 text-center transition-colors">
@@ -195,12 +160,28 @@ export default function RecipeDetail({ recipe, onBack, onToggleFavorite }: Recip
             </div>
           </button>
 
-          <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800 text-center transition-colors">
-            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-medium tracking-wider uppercase mb-1">Porții Rețetă</span>
-            <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 flex items-center gap-1">
-              <Users className="h-4 w-4 text-stone-500 dark:text-stone-400" />
-              {recipe.servings} {recipe.servings === 1 ? "porție" : "porții"}
-            </span>
+          <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800 text-center transition-colors">
+            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-medium tracking-wider uppercase mb-1">Câte porții?</span>
+            <div className="flex items-center gap-3 mt-1">
+              <button
+                onClick={() => setCurrentServings(Math.max(1, currentServings - 1))}
+                className="flex items-center justify-center h-7 w-7 rounded-full bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 text-stone-700 dark:text-stone-300 transition-colors shadow-sm focus:outline-none active:scale-95"
+                aria-label="Decrease servings"
+              >
+                <span className="text-base font-medium leading-none -mt-0.5">-</span>
+              </button>
+              <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 min-w-[3rem] text-center flex items-center justify-center gap-1">
+                <Users className="h-4 w-4 text-stone-500 dark:text-stone-400" />
+                {currentServings}
+              </span>
+              <button
+                onClick={() => setCurrentServings(currentServings + 1)}
+                className="flex items-center justify-center h-7 w-7 rounded-full bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 text-stone-700 dark:text-stone-300 transition-colors shadow-sm focus:outline-none active:scale-95"
+                aria-label="Increase servings"
+              >
+                <span className="text-base font-medium leading-none -mt-0.5">+</span>
+              </button>
+            </div>
           </div>
         </div>
 

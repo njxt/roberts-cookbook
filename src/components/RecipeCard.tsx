@@ -12,32 +12,40 @@ interface RecipeCardProps {
 export default function RecipeCard({ recipe, onViewDetails, onToggleFavorite }: RecipeCardProps) {
   // Determine difficulty color badges
   const difficultyColors = {
-    ușor: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    mediu: "bg-amber-50 text-amber-700 border-amber-100",
-    dificil: "bg-rose-50 text-rose-700 border-rose-100"
+    ușor: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-800/50",
+    mediu: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800/50",
+    dificil: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800/50"
   };
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-xs transition-shadow duration-300 hover:shadow-xl hover:shadow-stone-200/50 dark:hover:shadow-black/50 cursor-pointer"
+      whileHover={{ y: -6, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-xs transition-shadow duration-500 hover:shadow-2xl hover:shadow-stone-300/40 dark:hover:shadow-stone-950/80 cursor-pointer"
       onClick={() => onViewDetails(recipe)}
       id={`recipe-card-${recipe.id}`}
     >
       {/* Recipe image container */}
       <div className="relative aspect-4/3 w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
-        <img
-          src={recipe.imageUrl}
-          alt={recipe.title}
-          referrerPolicy="no-referrer"
-          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
+        {recipe.imageUrl ? (
+          <img
+            src={recipe.imageUrl}
+            alt={recipe.title}
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-stone-300 dark:text-stone-700">
+            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
         
         {/* Soft dark gradient overlay for lower text visibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -64,7 +72,7 @@ export default function RecipeCard({ recipe, onViewDetails, onToggleFavorite }: 
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center gap-2 mb-3">
           {/* Difficulty */}
-          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide uppercase ${difficultyColors[recipe.difficulty]} dark:bg-opacity-10`}>
+          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide uppercase ${difficultyColors[recipe.difficulty]}`}>
             {recipe.difficulty}
           </span>
 

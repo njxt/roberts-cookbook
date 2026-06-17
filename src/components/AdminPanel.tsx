@@ -65,13 +65,13 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setImageUrl("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000"); // Standard good default photo
+    setImageUrl(""); 
     setCategory("Mic Dejun");
-    setPrepTime(15);
-    setCookTime(15);
-    setServings(2);
+    setPrepTime(0);
+    setCookTime(0);
+    setServings(1);
     setDifficulty("ușor");
-    setCalories(350);
+    setCalories(0);
     setProtein(0);
     setCarbs(0);
     setFat(0);
@@ -168,7 +168,7 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
     id: editingRecipe?.id || "preview-temp",
     title: title || "Titlu Rețetă",
     description: description || "Descriere lungă sau scurtă a preparatului perfect...",
-    imageUrl: imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1000",
+    imageUrl: imageUrl || "",
     category,
     prepTime,
     cookTime,
@@ -186,14 +186,59 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8" id="admin-panel-container">
+      <AnimatePresence>
+        {recipeToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm cursor-pointer"
+              onClick={() => setRecipeToDelete(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm bg-white dark:bg-stone-900 rounded-3xl shadow-xl overflow-hidden p-6 text-center"
+            >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/30 mb-4">
+                <Trash2 className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+              </div>
+              <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 mb-2">Ștergere Rețetă</h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+                Ești sigur că vrei să ștergi această rețetă? Acțiunea este ireversibilă.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setRecipeToDelete(null)}
+                  className="px-6 py-2.5 rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-semibold hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                >
+                  Anulează
+                </button>
+                <button
+                  onClick={() => {
+                    onDeleteRecipe(recipeToDelete);
+                    setRecipeToDelete(null);
+                  }}
+                  className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md transition-colors"
+                >
+                  Confirmă
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Admin Title Block */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-stone-100 pb-6 mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-stone-100 dark:border-stone-800 pb-6 mb-8 gap-4">
         <div>
           <h2 className="text-2xl font-bold font-display text-stone-900 dark:text-white tracking-tight">
             Panou Administrativ
           </h2>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-normal">
-            Adaugă, editează, restructurează sau folosește asistentul inteligent Gemini AI pentru a menține colectia de rețete.
+            Adaugă, editează sau restructurează pentru a menține colecția de rețete.
           </p>
         </div>
 
@@ -220,16 +265,16 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
       </div>
 
       {/* Tabs list/form */}
-      <div className="flex border-b border-stone-100 mb-8 p-1 bg-stone-100 rounded-2xl max-w-sm">
+      <div className="flex mb-8 p-1 bg-stone-100 dark:bg-stone-800/50 rounded-2xl max-w-sm">
         <button
           onClick={() => { setActiveTab("list"); setEditingRecipe(null); }}
-          className={`flex-1 py-2 text-xs font-semibold rounded-xl text-center cursor-pointer transition-all ${activeTab === "list" ? "bg-white text-stone-900 shadow-xs" : "text-stone-500 hover:text-stone-950"}`}
+          className={`flex-1 py-2 text-xs font-semibold rounded-xl text-center cursor-pointer transition-all ${activeTab === "list" ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs" : "text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200"}`}
         >
           Toate Rețetele ({recipes.length})
         </button>
         <button
           onClick={() => setActiveTab("form")}
-          className={`flex-1 py-2 text-xs font-semibold rounded-xl text-center cursor-pointer transition-all ${activeTab === "form" ? "bg-white text-stone-900 shadow-xs" : "text-stone-500 hover:text-stone-950"}`}
+          className={`flex-1 py-2 text-xs font-semibold rounded-xl text-center cursor-pointer transition-all ${activeTab === "form" ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs" : "text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-200"}`}
         >
           {editingRecipe ? "Editează Rețetă" : "Formular Rețetă"}
         </button>
@@ -243,16 +288,16 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden"
+            className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-100 dark:border-stone-800 shadow-sm overflow-hidden"
           >
             {recipes.length === 0 ? (
               <div className="p-12 text-center">
-                <AlertCircle className="mx-auto h-12 w-12 text-stone-300 stroke-[1.5] mb-4" />
-                <h3 className="text-sm font-semibold text-stone-800">Nicio rețetă înregistrată</h3>
-                <p className="text-xs text-stone-500 mt-1">Poți adăuga una acum, sau poți reseta valoarea inițială.</p>
+                <AlertCircle className="mx-auto h-12 w-12 text-stone-300 dark:text-stone-700 stroke-[1.5] mb-4" />
+                <h3 className="text-sm font-semibold text-stone-800 dark:text-stone-200">Nicio rețetă înregistrată</h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Poți adăuga una acum, sau poți reseta valoarea inițială.</p>
                 <button
                   onClick={handleCreateNew}
-                  className="mt-4 inline-flex items-center gap-1 bg-stone-900 text-white px-4 py-2 rounded-full text-xs font-semibold"
+                  className="mt-4 inline-flex items-center gap-1 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 px-4 py-2 rounded-full text-xs font-semibold"
                 >
                   Creează prima rețetă
                 </button>
@@ -261,82 +306,67 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-stone-50 text-stone-400 text-[10px] font-bold uppercase tracking-wider border-b border-stone-100">
-                      <th className="py-4 px-6">Imagine & Denumire</th>
-                      <th className="py-4 px-6">Categorie</th>
-                      <th className="py-4 px-6 md:table-cell hidden">Timp Gătire</th>
-                      <th className="py-4 px-6 md:table-cell hidden">Dificultate</th>
-                      <th className="py-4 px-6 text-right">Acțiuni</th>
+                    <tr className="bg-stone-50 dark:bg-stone-800 text-stone-400 text-[10px] font-bold uppercase tracking-wider border-b border-stone-100 dark:border-stone-800">
+                      <th className="py-4 px-6 text-stone-500 dark:text-stone-400">Imagine & Denumire</th>
+                      <th className="py-4 px-6 text-stone-500 dark:text-stone-400">Categorie</th>
+                      <th className="py-4 px-6 md:table-cell hidden text-stone-500 dark:text-stone-400">Timp Gătire</th>
+                      <th className="py-4 px-6 md:table-cell hidden text-stone-500 dark:text-stone-400">Dificultate</th>
+                      <th className="py-4 px-6 text-right text-stone-500 dark:text-stone-400">Acțiuni</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 text-sm">
+                  <tbody className="divide-y divide-stone-100 dark:divide-stone-800 text-sm">
                     {recipes.map((rec) => (
-                      <tr key={rec.id} className="hover:bg-stone-50/50 transition-colors">
+                      <tr key={rec.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-4">
-                            <img
-                              src={rec.imageUrl}
-                              alt={rec.title}
-                              referrerPolicy="no-referrer"
-                              className="w-12 h-12 rounded-xl object-cover border border-stone-100 shrink-0"
-                            />
+                            {rec.imageUrl ? (
+                              <img
+                                src={rec.imageUrl}
+                                alt={rec.title}
+                                referrerPolicy="no-referrer"
+                                className="w-12 h-12 rounded-xl object-cover border border-stone-100 dark:border-stone-800 shrink-0 bg-stone-100 dark:bg-stone-800"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-xl border border-stone-100 dark:border-stone-800 shrink-0 bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-300 dark:text-stone-700">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                            )}
                             <div>
-                              <h4 className="font-semibold text-stone-900 line-clamp-1">{rec.title}</h4>
-                              <p className="text-xs text-stone-400 line-clamp-1 mt-0.5">{rec.description}</p>
+                              <h4 className="font-semibold text-stone-900 dark:text-stone-100 line-clamp-1">{rec.title}</h4>
+                              <p className="text-xs text-stone-400 dark:text-stone-500 line-clamp-1 mt-0.5">{rec.description}</p>
                             </div>
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <span className="p-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-semibold">
+                          <span className="p-1.5 rounded-lg bg-stone-100 dark:bg-stone-800/50 text-stone-700 dark:text-stone-300 text-xs font-semibold">
                             {rec.category}
                           </span>
                         </td>
-                        <td className="py-4 px-6 md:table-cell hidden text-stone-600 font-medium text-xs">
+                        <td className="py-4 px-6 md:table-cell hidden text-stone-600 dark:text-stone-400 font-medium text-xs">
                           {rec.prepTime + rec.cookTime} minute
                         </td>
                         <td className="py-4 px-6 md:table-cell hidden">
-                          <span className="text-xs font-medium text-stone-800 capitalize">
+                          <span className="text-xs font-medium text-stone-800 dark:text-stone-200 capitalize">
                             {rec.difficulty}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-right space-x-1 whitespace-nowrap">
-                          {recipeToDelete === rec.id ? (
-                            <div className="inline-flex items-center gap-2">
-                              <span className="text-xs text-rose-500 font-medium">Sigur?</span>
-                              <button
-                                onClick={() => {
-                                  onDeleteRecipe(rec.id);
-                                  setRecipeToDelete(null);
-                                }}
-                                className="px-2 py-1 bg-rose-500 text-white rounded-md text-[10px] font-bold hover:bg-rose-600 transition-colors"
-                              >
-                                DA
-                              </button>
-                              <button
-                                onClick={() => setRecipeToDelete(null)}
-                                className="px-2 py-1 bg-stone-200 text-stone-700 rounded-md text-[10px] font-bold hover:bg-stone-300 transition-colors"
-                              >
-                                NU
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => setEditingRecipe(rec)}
-                                className="p-2 text-stone-600 bg-white hover:bg-stone-100 hover:text-stone-900 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
-                                title="Modifica Reteta"
-                              >
-                                <Edit2 className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={() => setRecipeToDelete(rec.id)}
-                                className="p-2 ml-1 text-rose-500 bg-white hover:bg-rose-50 hover:text-rose-700 rounded-xl border border-stone-100 shadow-2xs cursor-pointer inline-flex items-center justify-center"
-                                title="Sterge Reteta"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </>
-                          )}
+                          <button
+                            onClick={() => setEditingRecipe(rec)}
+                            className="p-2 text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-stone-100 rounded-xl border border-stone-100 dark:border-stone-700 shadow-2xs cursor-pointer inline-flex items-center justify-center"
+                            title="Modifica Reteta"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setRecipeToDelete(rec.id)}
+                            className="p-2 ml-1 text-rose-500 bg-white dark:bg-stone-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-400 rounded-xl border border-stone-100 dark:border-stone-700 shadow-2xs cursor-pointer inline-flex items-center justify-center"
+                            title="Sterge Reteta"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -462,85 +492,85 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Prep (min)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Prep (min)</label>
                     <input
                       type="number"
                       value={prepTime}
                       onChange={(e) => setPrepTime(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Gătire (min)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Gătire (min)</label>
                     <input
                       type="number"
                       value={cookTime}
                       onChange={(e) => setCookTime(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Porții</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Porții</label>
                     <input
                       type="number"
                       value={servings}
                       onChange={(e) => setServings(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Calorii (kcal)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Calorii (kcal)</label>
                     <input
                       type="number"
                       value={calories}
                       onChange={(e) => setCalories(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pb-2 border-b border-stone-50">
+                <div className="grid grid-cols-3 gap-4 pb-2 border-b border-stone-50 dark:border-stone-800">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Proteine (g)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Proteine (g)</label>
                     <input
                       type="number"
                       value={protein}
                       onChange={(e) => setProtein(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-blue-500 text-blue-700 bg-blue-50/30"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-blue-500 text-blue-700 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/20"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Carbohidrați (g)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Carbohidrați (g)</label>
                     <input
                       type="number"
                       value={carbs}
                       onChange={(e) => setCarbs(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500 text-amber-700 bg-amber-50/30"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500 text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-900/20"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Grăsimi (g)</label>
+                    <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Grăsimi (g)</label>
                     <input
                       type="number"
                       value={fat}
                       onChange={(e) => setFat(Number(e.target.value))}
-                      className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-rose-500 text-rose-700 bg-rose-50/30"
+                      className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-rose-500 text-rose-700 dark:text-rose-400 bg-rose-50/30 dark:bg-rose-900/20"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1.5">Dificultate</label>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Dificultate</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["ușor", "mediu", "dificil"] as RecipeDifficulty[]).map((dif) => (
                       <button
                         type="button"
                         key={dif}
                         onClick={() => setDifficulty(dif)}
-                        className={`py-2 text-xs font-semibold rounded-xl border text-center uppercase cursor-pointer transition-all ${difficulty === dif ? "bg-stone-900 border-stone-900 text-white shadow-xs" : "bg-white border-stone-200 text-stone-600 hover:border-stone-400"}`}
+                        className={`py-2 text-xs font-semibold rounded-xl border text-center uppercase cursor-pointer transition-all ${difficulty === dif ? "bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 shadow-xs" : "bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-400 dark:hover:border-stone-500"}`}
                       >
                         {dif}
                       </button>
@@ -551,18 +581,18 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
               {/* Dynamic Ingredients list */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-stone-50 pb-2">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400">Ingrediente</h3>
+                <div className="flex items-center justify-between border-b border-stone-50 dark:border-stone-800 pb-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Ingrediente</h3>
                   <button
                     type="button"
                     onClick={handleAddIngredient}
-                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-stone-400 px-3 py-1 text-[11px] font-semibold text-stone-700 bg-white transition-all scale-95"
+                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 px-3 py-1 text-[11px] font-semibold text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 transition-all scale-95"
                   >
                     <Plus className="h-3 w-3" /> Adaugă Rând
                   </button>
                 </div>
 
-                <p className="text-[10px] text-stone-400">Specificați cantitățile logic (ex: "250g făină", "1/2 linguriță chili").</p>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500">Specificați cantitățile logic (ex: "250g făină", "1/2 linguriță chili").</p>
 
                 <div className="space-y-2">
                   {ingredients.map((ing, idx) => (
@@ -572,12 +602,12 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
                         value={ing}
                         onChange={(e) => handleIngredientChange(idx, e.target.value)}
                         placeholder={`Ingredient ${idx + 1}`}
-                        className="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                        className="flex-1 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveIngredient(idx)}
-                        className="p-2 text-stone-400 hover:text-stone-900 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 shrink-0 inline-flex items-center justify-center cursor-pointer"
+                        className="p-2 text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-700 shrink-0 inline-flex items-center justify-center cursor-pointer"
                         title="Sterge ingredient"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -589,12 +619,12 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
               {/* Dynamic Instructions steps */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-stone-50 pb-2">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400">Etape Preparare</h3>
+                <div className="flex items-center justify-between border-b border-stone-50 dark:border-stone-800 pb-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Etape Preparare</h3>
                   <button
                     type="button"
                     onClick={handleAddInstruction}
-                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-stone-400 px-3 py-1 text-[11px] font-semibold text-stone-700 bg-white transition-all scale-95"
+                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 px-3 py-1 text-[11px] font-semibold text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 transition-all scale-95"
                   >
                     <Plus className="h-3 w-3" /> Adaugă Pas
                   </button>
@@ -603,7 +633,7 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
                 <div className="space-y-3">
                   {instructions.map((step, idx) => (
                     <div key={idx} className="flex gap-2 items-start">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 text-stone-600 font-semibold text-xs shrink-0 mt-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-semibold text-xs shrink-0 mt-2">
                         {idx + 1}
                       </span>
                       <textarea
@@ -611,12 +641,12 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
                         value={step}
                         onChange={(e) => handleInstructionChange(idx, e.target.value)}
                         placeholder={`Descrieți etapa ${idx + 1}...`}
-                        className="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800"
+                        className="flex-1 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-stone-500 text-stone-800 dark:text-stone-200"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveInstruction(idx)}
-                        className="p-2 text-stone-400 hover:text-stone-900 bg-stone-50 hover:bg-stone-100 rounded-xl border border-stone-200 shrink-0 mt-1 inline-flex items-center justify-center cursor-pointer"
+                        className="p-2 text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-xl border border-stone-200 dark:border-stone-700 shrink-0 mt-1 inline-flex items-center justify-center cursor-pointer"
                         title="Sterge pas"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -628,8 +658,8 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
 
               {/* Form errors indicator */}
               {formErrors.length > 0 && (
-                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-700 font-medium space-y-1">
-                  <p className="text-xs font-semibold flex items-center gap-1.5 mb-1 text-rose-800">
+                <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 font-medium space-y-1">
+                  <p className="text-xs font-semibold flex items-center gap-1.5 mb-1 text-rose-800 dark:text-rose-300">
                     <AlertCircle className="h-4 w-4" />
                     Vă rugăm să rectificați erorile completate:
                   </p>
@@ -642,17 +672,17 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
               )}
 
               {/* Submit panel buttons */}
-              <div className="flex gap-3 justify-end pt-4 border-t border-stone-50">
+              <div className="flex gap-3 justify-end pt-4 border-t border-stone-50 dark:border-stone-800">
                 <button
                   type="button"
                   onClick={() => { setActiveTab("list"); setEditingRecipe(null); }}
-                  className="px-6 py-2 rounded-xl text-xs font-semibold hover:bg-stone-50 text-stone-700 cursor-pointer"
+                  className="px-6 py-2 rounded-xl text-xs font-semibold hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 cursor-pointer"
                 >
                   Anulează
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-stone-950 hover:bg-stone-900 text-white px-6 py-2.5 text-xs font-semibold shadow-md cursor-pointer transition-all active:scale-95"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-stone-950 dark:bg-stone-100 hover:bg-stone-900 dark:hover:bg-white text-white dark:text-stone-900 px-6 py-2.5 text-xs font-semibold shadow-md cursor-pointer transition-all active:scale-95"
                   id="admin-submit-btn"
                 >
                   <Save className="h-4 w-4" />
@@ -665,9 +695,9 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
             <div className="lg:col-span-5 lg:sticky lg:top-8 space-y-4">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4 text-[#9d5c3d]" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">Previzualizare Live</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Previzualizare Live</h3>
               </div>
-              <p className="text-[10px] text-stone-400 italic">Aceasta este reprezentarea exactă a cardului care va apărea în catalogul public:</p>
+              <p className="text-[10px] text-stone-400 dark:text-stone-500 italic">Aceasta este reprezentarea exactă a cardului care va apărea în catalogul public:</p>
               
               <div className="max-w-[340px]">
                 <RecipeCard
@@ -678,8 +708,8 @@ export default function AdminPanel({ recipes, onSaveRecipe, onDeleteRecipe, onCl
               </div>
 
               {/* Little informative card */}
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-100 text-stone-500 text-[11px] leading-relaxed max-w-[340px]">
-                <p>💡 Pozele adăugate trebuie să fie linkuri valide. Puteți folosi cu succes site-ul <strong>unsplash.com</strong> pentru a căuta adrese foto de mâncare excepționale!</p>
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800 text-stone-500 dark:text-stone-400 text-[11px] leading-relaxed max-w-[340px]">
+                <p>💡 Fotografiile adăugate trebuie să fie sub formă de link-uri valide directe (URL). Reprezentarea implicită (în lipsa unei imagini) va afișa un ecran de înlocuire estetic.</p>
               </div>
             </div>
 

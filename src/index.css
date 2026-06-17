@@ -11,17 +11,17 @@
 
 /* Redefine stone colors in dark mode to be zinc (cooler, cleaner black) */
 .dark {
-  --color-stone-950: #0a0a0a;
-  --color-stone-900: #171717;
-  --color-stone-800: #262626;
-  --color-stone-700: #404040;
-  --color-stone-600: #525252;
-  --color-stone-500: #737373;
-  --color-stone-400: #a3a3a3;
-  --color-stone-300: #d4d4d4;
-  --color-stone-200: #e5e5e5;
-  --color-stone-100: #f5f5f5;
-  --color-stone-50: #fafafa;
+  --color-stone-950: #050505;
+  --color-stone-900: #0f0f0f;
+  --color-stone-800: #1a1a1a;
+  --color-stone-700: #2a2a2a;
+  --color-stone-600: #3f3f3f;
+  --color-stone-500: #5c5c5c;
+  --color-stone-400: #858585;
+  --color-stone-300: #b0b0b0;
+  --color-stone-200: #d6d6d6;
+  --color-stone-100: #ededed;
+  --color-stone-50: #f7f7f7;
 }
 
 /* Custom gorgeous mesh backdrop like in the prompt image */
@@ -50,7 +50,7 @@ body {
   }
   
   /* Hide non-printable app UI */
-  .mesh-glow, header, button, #detail-back-btn, #print-recipe-btn, #share-recipe-btn, #heart-recipe-btn {
+  .mesh-glow, header, button, #detail-back-btn, #heart-recipe-btn {
     display: none !important;
   }
   
@@ -100,4 +100,38 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Premium, sleek hardware-accelerated animations for interactive elements */
+button:not(.absolute), a[href] {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+  will-change: transform, box-shadow;
+}
+
+button:not(.absolute):hover, a[href^="#"]:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.dark button:not(.absolute):hover, .dark a[href^="#"]:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+button:not(.absolute):active, a[href^="#"]:active {
+  transform: scale(0.96) translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Inputs animations */
+input, textarea {
+  transition: all 0.3s ease-out !important;
+}
+
+input:focus, textarea:focus {
+  transform: scale(1.01);
+}
+
+/* Refine Recipe Card slightly more sleek on hover */
+div[id^="recipe-card-"] {
+  will-change: transform, box-shadow;
 }
